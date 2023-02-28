@@ -14,11 +14,11 @@ export const handler = {
     error: async (err: Error & { msg?: string }) => {
         try {
             const msg = `Error: ${err?.name ?? 'Unknown Error'}:: ${err?.message ?? err?.msg ?? 'Unknown Error Message'}`
-            console.error(msg)
+            console.log(`[Error] ${msg}`)
             setLogDir()
             fs.writeFileSync(resolve(__dirname, './log/error.log'), `${new Date().toLocaleDateString()}\n${msg}\n`, { flag: 'a' })
         } catch (error) {
-            console.error(error)
+            console.log(`[Error] ${error}`)
         }
     },
     access: async (ctx: Context) => {

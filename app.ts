@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 export { handler } from './core/handler'
 export { response } from './core/response'
-export { Application, AppPlugins } from './core/application'
+export { Application, AppPlugins, AppPluginsNoNext } from './core/application'
 export { requestParser } from './core/application/parser'
 export { Container, Constructor } from './core/central'
 export { Controller } from './core/decorator/controller'

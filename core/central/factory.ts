@@ -1,22 +1,22 @@
+import fs from 'fs'
 import { Context, Next } from "koa"
 import { Constructor, Container } from "."
-import { AppPlugins, Application } from "../application"
+import { AppPluginsNoNext, Application } from "../application"
+import { DataBase, PoolConfig } from "../database"
+import { ParamType } from "../decorator/param"
+import { PropType } from "../decorator/property"
 import { MetaDataType } from "../decorator/type"
 import { handler } from "../handler"
 import { response } from "../response"
-import { ParamType } from "../decorator/param"
-import fs from 'fs'
-import { DataBase, PoolConfig } from "../database"
-import { PropType } from "../decorator/property"
 
 export interface CreamOptions {
     controller: Constructor<any>[],
     provider: Constructor<any>[],
-    plugins?: AppPlugins,
+    plugins?: AppPluginsNoNext,
 }
 export interface CreamConfig {
-    port: number;
-    database: PoolConfig;
+    port: number
+    database: PoolConfig
 }
 export type ParamHandler = (p: { ctx: Context, type: string, key: string }) => any
 export type PropHandler = (p: { ctx: Context, type: string, key: string }) => any
@@ -42,14 +42,15 @@ export class Cream {
     useParamHandler(process: ParamHandler) {
         this.paramHandler.push(process)
     }
+    usePropHandler(process: PropHandler) {
+        this.propHandler.push(process)
+    }
 
     /** Start Server */
     async bootstrap() {
         const config = await this.loadConfig()
         this.db = new DataBase(config.database)
-        const plugins = this.options.plugins ?? []
-        plugins.push(this.requestHandler.bind(this))
-        const app = new Application(plugins)
+        const app = new Application([this.requestHandler.bind(this)])
         app.listen(config.port, () => {
             console.info('=== Cream V3.0 Server ===\n')
             console.info('Listen %d ...', config.port)
@@ -80,6 +81,7 @@ export class Cream {
     }
 
     private async handler(ctx: Context) {
+        for (let plugin of (this.options?.plugins ?? [])) await plugin?.(ctx)
         const router = this.router
         const path = ctx.path
         const unitList = path.split('/').map(item => item.trim()).filter(item => item.length > 0)
@@ -114,7 +116,7 @@ export class Cream {
         const propInjection: Record<string, any> = {}
         props.forEach(prop => {
             let value: any = null
-            switch(prop.type) {
+            switch (prop.type) {
                 case 'database':
                     value = this.db?.getBase(prop.value)
                     break

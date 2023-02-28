@@ -3,13 +3,13 @@ import session from 'koa-session'
 import { handler } from '../handler'
 import { requestParser } from './parser'
 export type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
+export type AppPluginsNoNext = ((ctx: Context) => Promise<any> | any)[]
 
 export class Application extends koa {
-    constructor(private plugins?: AppPlugins) {
+    constructor(private plugins?: AppPlugins | AppPluginsNoNext) {
         super()
         try {
             this.init()
-
         } catch (error: any) {
             handler.error(error)
         }
