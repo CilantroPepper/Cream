@@ -1,0 +1,11 @@
+{
+    "port": 82,
+    "database": {
+        "host": "localhost",
+        "port": 3306,
+        "database": "Database Name",
+        "user": "User Name",
+        "password": "Database Password",
+        "connectionLimit": 20
+    }
+}

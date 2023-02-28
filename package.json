@@ -1,0 +1,28 @@
+{
+  "name": "cream",
+  "version": "3.0.0",
+  "description": "A NodeJS server application using TypeScript based on Koa2, with IoC container and dependency injection pattern.",
+  "main": "app.ts",
+  "scripts": {
+    "build": "esbuild app.ts --platform=node --format=esm --bundle --outfile=./dist/cream.js --target=es2016",
+    "minify": "esbuild app.ts --platform=node --format=esm --bundle --outfile=./dist/cream.mjs --minify --target=es2016"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
+    "@types/koa": "^2.13.5",
+    "@types/koa-session": "^5.10.6",
+    "@types/node": "^18.14.2",
+    "esbuild": "^0.17.10",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "crypto-js": "^4.1.1",
+    "koa": "^2.14.1",
+    "koa-session": "^6.4.0",
+    "mysql2": "^3.1.2",
+    "reflect-metadata": "^0.1.13"
+  }
+}
