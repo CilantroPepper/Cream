@@ -70,12 +70,12 @@ export class Cream {
                 response.success(ctx, data?.data ?? data ?? '', data?.headers)
             else
                 response.success(ctx, {
-                    code: data?.code ?? 200,
+                    code: 200,
                     data: data?.data !== void 0 ? data?.data : data ?? null,
                     msg: data?.msg ?? 'success'
                 }, data?.headers)
         } catch (e: any) {
-            response.fail(ctx, e?.code ?? 404, e?.msg ?? 'Request Error')
+            response.fail(ctx, typeof e?.code === 'number' ? e.code : 404, e?.msg ?? 'Request Error')
             handler.error(e)
         }
     }
