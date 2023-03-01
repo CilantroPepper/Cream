@@ -26,6 +26,11 @@ export interface CreamOptions {
     provider: Constructor<any>[],
     plugins?: AppPlugins,
 }
+export interface Cache {
+    get: <T>(k: string) => T | null;
+    set: <T>(k: string, v: T) => void;
+    del: () => void
+}
 export interface CacheOptions {
     stdTtl?: number,
     checkTime?: number

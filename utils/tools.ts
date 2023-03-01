@@ -10,6 +10,7 @@ export const tools = {
         Base64Encode: (origin: string) => Base64.stringify(Utf8.parse(origin)),
     },
     checkParam(target: Record<string, string>, required: string[]) {
+        if (!target) return true
         return required.reduce((pre, cur) => {
             if (!pre) return pre
             return target[cur] !== void 0

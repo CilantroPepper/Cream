@@ -108,8 +108,8 @@ export class Cream {
             if (param.type === 'query') return ctx.query[param.key]
             if (param.type === 'form') return ctx?.data?.[param.key]
             if (param.type === 'file') return ctx?.data?.['file']
-            if (param.type === 'formdata') return ctx?.data
-            if (param.type === 'querydata') return ctx?.query
+            if (param.type === 'formMap') return ctx?.data ?? {}
+            if (param.type === 'queryMap') return ctx?.query ?? {}
             return this.paramHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: param.type, key: param.key }), null)
         })
         const props: PropType[] = Reflect.getMetadata(MetaDataType.INJECT_PROP, instance) ?? []
