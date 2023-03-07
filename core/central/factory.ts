@@ -51,6 +51,7 @@ export class Cream {
         const config = await this.loadConfig()
         this.db = new DataBase(config.database)
         const app = new Application([this.requestHandler.bind(this)])
+        app.proxy = true
         app.listen(config.port, () => {
             console.info('=== Cream V3.0 Server ===\n')
             console.info('Listen %d ...', config.port)

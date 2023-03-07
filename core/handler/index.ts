@@ -23,8 +23,9 @@ export const handler = {
     },
     access: async (ctx: Context) => {
         try {
+            const from = ctx.ips.join(',')
             setLogDir()
-            const msg = `${new Date().toLocaleDateString()}\nPath: ${ctx.path}, Query: ${ctx.querystring}, ip: ${ctx.ips}\n`
+            const msg = `${new Date().toLocaleDateString()}\nPath: ${ctx.path}, Query: ${ctx.querystring}, from: ${from}\n`
             fs.writeFileSync(resolve(__dirname, './log/access.log'), msg, { flag: 'a' })
         } catch (error: any) {
             handler.error(new Error(error))

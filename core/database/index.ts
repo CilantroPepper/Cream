@@ -38,7 +38,7 @@ export class DataBase {
                 throw e
             }
         } catch (e) {
-            throw e
+            throw new Error(`SQL Error while executing statement: ${statement}\nargs:${args.join(',')}\n${e}`)
         }
     }
 
@@ -115,8 +115,11 @@ export class DataBase {
                 }
             },
             async update<T extends object>(entity: T, conditions: Record<string, any>[]) {
-                const itemList = Object.entries(entity).map(item => `${item[0]} = ?`)
                 const args: any[] = []
+                const itemList = Object.entries(entity).map(item => {
+                    args.push(item[1])
+                    return `${item[0]} = ?`
+                })
                 let statement = `UPDATE ${table} SET ${itemList.join(',')} WHERE`
                 conditions.forEach((condition, index) => {
                     statement += '('
@@ -127,9 +130,9 @@ export class DataBase {
                     statement = statement.slice(0, -4) + ')'
                     if (index < condition.length - 1) statement += ' OR'
                 })
-                statement += `${conditions.length === 0 ? '' : ') AND'} DELETED = 0`
+                statement += `${conditions.length === 0 ? '' : ' AND'} DELETED = 0`
                 try {
-                    await self.query(statement, args)
+                    await self.query(statement, ...args)
                 } catch (e) {
                     throw e
                 }
