@@ -187,3 +187,192 @@ npm install
    ```
 
    
+
+
+
+## 使用
+
+### Plugins 插件
+
+plugins 是在 Controller 处理请求之前的中间件，他的是一个数组：
+
+```typescript
+type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
+```
+
+他将会在每个请求进入 Controller 处理流程前，按照注入顺序逐个调用，如果要在某个插件中拦截该请求，只需要使用 `throw` 抛出一个对象 `{code: number; msg: string}`，其中的 `code` 和 `msg` 将分别应用于请求的响应状态 `statusCode` 和响应消息 `statusMessage`
+
+---
+
+
+
+### ParamHandler 参数处理器
+
+Cream 使用了控制反转的设计模式，在每个客户端请求时自动调用相应的 `Controller` 和 `Service` 来处理请求，在注入相应的 Controller 中的方法时，允许开发者使用装饰器来描述参数类型，并且自定义注入值，比如：
+
+```typescript
+@Controller('/')
+export class IndexController {
+    @Post('')
+    async getIndex(
+    	@Query('name') name: string,
+        @Form('message') message: string) {
+        return { name, message }
+    }
+}
+```
+
+Cream 内置了几种参数类型：
+
+- Query：查询参数，例如 `?id=1234&name=Mike` 能被 `@Query('id')` 和 `@Query('name')` 捕获并注入方法
+- Form：表单字段或 JSON 字段，例如使用 POST 方法提交的表单 `{ id: 1234, name: 'Mike' }` 能被 `@Form('id')` 和 `@Form('name')` 捕获并注入
+- QueryMap：所有查询参数，使用 `@QueryMap queryMap: Record<string, any>` 可以捕获全部查询参数并且作为一个对象注入
+- FormMap：所有表单字段或 JSON 字段，使用 `@FormMap formMap: Record<string, any>` 可以捕获全部表单数据或 JSON 数据并作为一个对象注入
+
+当然你也可以自定义参数类型，只需要使用：
+
+`@Param(key: string, type: string)` 来装饰引元，即可完成自定义参数，比如
+
+```typescript
+@Get('')
+async getIndex(@Param('index', 'myParamType') param: string) {
+    // ...
+}
+```
+
+自定义参数通常需要配合自定义的**参数处理器**来使用，`Cream` 对象提供一个参数处理器注册入口：
+
+`useParamHandler(handler: ParamHandler)`
+
+```typescript
+type ParamHandler = (p: { 
+    ctx: Context, // 当前请求上下文
+    type: string, // 自定义的类型
+    key: string   // 自定义的值
+}) => any
+```
+
+Cream 会在遇到自定义的参数类型时调用自定义参数处理器，直到找到一个返回值不为 `null` 和 `undefined` 的处理器后，注入到对应的引元上。所以，合法的处理器应该在遇到非本模块负责的自定义类型时返回 `null`，你可以通过不断调用 `useParamHandler` 方法来注册多个处理器。
+
+---
+
+
+
+### PropHandler 属性处理器
+
+类似参数类型注入，Cream 也提供了对象属性的注入，需要注意，该注入是**一次性**的，也即注入后只在当前上下文有效，Cream 内置了一种属性类型：`@Database(table: string)` 用以获取一个相应数据表的数据库连接，他的用法非常简单：
+
+```typescript
+@Controller('/')
+export class IndexController {
+	@Database('NOTIFICATION')
+    private base!: Base
+    
+    // ...
+    
+    @Get('')
+    async getIndex() {
+        const { items } = await this.base.fetch(['title, content, date'], [{ date: tools.getCurrentDate() }])
+        return items
+    }
+}
+```
+
+> 有关 Database 的元操作 `fetch` | `update` | `put` | `remove` 详见 **Database 元操作**
+
+Cream 也支持自定义属性类型和他的处理器，用法与参数类型和参数处理器相差无几。
+
+使用装饰器 `@Property(value: string, type: string)` 来装饰一个 Controller 类的属性成员。
+
+`Cream` 对象提供了一个注册入口：`usePropHandler(handler: PropHandler)`
+
+```typescript
+type PropHandler = (p: { 
+    ctx: Context, // 当前请求上下文
+    type: string, // 自定义属性类型
+    key: string   // 自定义值
+}) => any
+```
+
+同样的，你应该在自定义处理器一开始判断属性类型，如果不是该模块负责的类型应该直接返回一个 `null`
+
+你可以通过不断调用 `usePropHandler` 方法来注册不同的属性处理器。
+
+---
+
+
+
+### 获取内置单例 IoC 容器
+
+Cream 对象内置一个管理 Cream 所用到的类对象的 IoC 容器，你可以使用 `Cream.getContainer()` 来获取它，并且使用 `register()` 和 `resolve()` 方法来注册/获取一个单例对象。
+
+---
+
+
+
+### 创建外部 IoC 容器
+
+Cream 模块导出了名为 `Container` 的 IoC 容器，你可以使用 `new Container()` 来创建外部的 IoC 容器并且运用到其他场景中。注意，该 IoC 容器中的所有对象都会是**单例**的。
+
+---
+
+
+
+
+
+## 数据库操作
+
+Cream 基于 MySQL 封装了连接池并且提供了一套类似 NoSQL 的 API：`fetch` | `put` | `remove` | `update`，可以实现基本的增删改查操作。 
+
+
+
+
+
+## 接口
+
+```typescript
+import { Context, Next } from 'koa'
+export interface Result<T> {
+    items: T[],
+    fields: any
+}
+export interface PoolConfig {
+    host: string,
+    port: number,
+    database: string,
+    user: string,
+    password: string,
+    connectionLimit: number
+}
+export interface Base {
+    fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[]): Promise<Result<T>>
+    put<T extends object>(entity: T): Promise<Result<object>>
+    remove(conditions: Record<string, any>): Promise<object>
+    update<T extends object>(entity: T, conditions: Record<string, any>[]): Promise<object>
+}
+export type Constructor<T> = new (...args: any[]) => T
+export type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
+export type ParamHandler = (p: { ctx: Context, type: string, key: string }) => any
+export type PropHandler = (p: { ctx: Context, type: string, key: string }) => any
+export interface CreamOptions {
+    controller: Constructor<any>[],
+    provider: Constructor<any>[],
+    plugins?: AppPlugins,
+}
+export interface Cache {
+    get: <T>(k: string) => T | null;
+    set: <T>(k: string, v: T) => void;
+    del: () => void
+}
+export interface CacheOptions {
+    stdTtl?: number,
+    checkTime?: number
+}
+export interface CreamConfig {
+    port: number;
+    database: PoolConfig;
+}
+```
+
+
+
