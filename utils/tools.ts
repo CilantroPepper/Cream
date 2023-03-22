@@ -1,6 +1,7 @@
 import CryptoJS from "crypto-js"
 import Base64 from "crypto-js/enc-base64"
 import Utf8 from "crypto-js/enc-utf8"
+import mime from "mime"
 
 export const tools = {
     crypto: {
@@ -9,6 +10,7 @@ export const tools = {
         base64Decode: (origin: string) => Base64.parse(origin).toString(Utf8),
         base64Encode: (origin: string) => Base64.stringify(Utf8.parse(origin)),
     },
+    mime,
     checkParam(target: Record<string, string>, required: string[]) {
         if (!target) return true
         return required.reduce((pre, cur) => {
