@@ -194,15 +194,26 @@ npm install
 
 ### Plugins 插件
 
-plugins 是在 Controller 处理请求之前的中间件，他的是一个数组：
+plugins 是在 Controller 处理请求之前的中间件，他是一个数组：
 
 ```typescript
-type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
+type AppPluginsNoNext = ((ctx: Context) => Promise<any> | any)[]
 ```
 
 他将会在每个请求进入 Controller 处理流程前，按照注入顺序逐个调用，如果要在某个插件中拦截该请求，只需要使用 `throw` 抛出一个对象 `{code: number; msg: string}`，其中的 `code` 和 `msg` 将分别应用于请求的响应状态 `statusCode` 和响应消息 `statusMessage`
 
+> 请注意：如果抛出的 `code` 为 200 的话，它将不被认为是一个错误，而是将你所抛出的错误原封不动的尝试交给 Response Parser 处理，他可能会被封装成 JSON 然后完全返回到客户端
+
 ---
+
+
+### Midwares 中间件
+
+midwares 对应了 Koa 的中间件，他将作用于解析请求并分发 Controller 之前，如果你想使用 koa-static 一类的中间件，你需要使用该属性来让 Cream 引用他（引用格式详见根目录下 `interface.ts` 的 `CreamOptions`）
+
+```typescript
+type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
+```
 
 
 

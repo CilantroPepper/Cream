@@ -19,12 +19,14 @@ export interface Base {
 }
 export type Constructor<T> = new (...args: any[]) => T
 export type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
+export type AppPluginsNoNext = ((ctx: Context) => Promise<any> | any)[]
 export type ParamHandler = (p: { ctx: Context, type: string, key: string }) => any
 export type PropHandler = (p: { ctx: Context, type: string, key: string }) => any
 export interface CreamOptions {
     controller: Constructor<any>[],
     provider: Constructor<any>[],
-    plugins?: AppPlugins,
+    plugins?: AppPluginsNoNext,
+    midwares?: AppPlugins
 }
 export interface Cache {
     get: <T>(k: string) => T | null;

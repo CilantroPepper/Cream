@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { Context, Next } from "koa"
 import { Constructor, Container } from "."
-import { AppPluginsNoNext, Application } from "../application"
+import { AppPlugins, AppPluginsNoNext, Application } from "../application"
 import { DataBase, PoolConfig } from "../database"
 import { ParamType } from "../decorator/param"
 import { PropType } from "../decorator/property"
@@ -13,6 +13,7 @@ export interface CreamOptions {
     controller: Constructor<any>[],
     provider: Constructor<any>[],
     plugins?: AppPluginsNoNext,
+    midwares?: AppPlugins
 }
 export interface CreamConfig {
     port: number
@@ -50,7 +51,7 @@ export class Cream {
     async bootstrap() {
         const config = await this.loadConfig()
         this.db = new DataBase(config.database)
-        const app = new Application([this.requestHandler.bind(this)])
+        const app = new Application([...(this.options?.midwares || []), this.requestHandler.bind(this)])
         app.proxy = true
         app.listen(config.port, () => {
             console.info('=== Cream V3.0 Server ===\n')
@@ -82,8 +83,12 @@ export class Cream {
     }
 
     private async handler(ctx: Context) {
-        for (let plugin of (this.options?.plugins ?? [])) await plugin?.(ctx)
-        const router = this.router
+        try {
+            for (let plugin of (this.options?.plugins ?? [])) await plugin?.(ctx)
+        } catch (error: any) {
+            if (error?.code === 200) return error // Can be the response
+            else throw error
+        } const router = this.router
         const path = ctx.path
         const unitList = path.split('/').map(item => item.trim())
         let unit = ''
