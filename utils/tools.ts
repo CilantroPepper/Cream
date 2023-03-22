@@ -7,7 +7,7 @@ export const tools = {
         aesEncrypt: (origin: string, key: string) => CryptoJS.AES.encrypt(origin, key).toString(),
         aesDecrypt: (origin: string, key: string) => CryptoJS.AES.decrypt(origin, key).toString(Utf8),
         base64Decode: (origin: string) => Base64.parse(origin).toString(Utf8),
-        Base64Encode: (origin: string) => Base64.stringify(Utf8.parse(origin)),
+        base64Encode: (origin: string) => Base64.stringify(Utf8.parse(origin)),
     },
     checkParam(target: Record<string, string>, required: string[]) {
         if (!target) return true

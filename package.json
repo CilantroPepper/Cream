@@ -5,7 +5,8 @@
   "main": "app.ts",
   "scripts": {
     "build": "esbuild app.ts --platform=node --format=esm --bundle --outfile=./dist/cream.js --target=es2016",
-    "minify": "esbuild app.ts --platform=node --format=esm --bundle --outfile=./dist/cream.mjs --minify --target=es2016"
+    "minify": "esbuild app.ts --platform=node --format=esm --bundle --outfile=./dist/cream.min.js --minify --target=es2016",
+    "build-cjs": "esbuild app.ts --platform=node --format=cjs --bundle --outfile=./dist/cream.js --target=es2016"
   },
   "keywords": [],
   "author": "",

@@ -85,19 +85,18 @@ export class Cream {
         for (let plugin of (this.options?.plugins ?? [])) await plugin?.(ctx)
         const router = this.router
         const path = ctx.path
-        const unitList = path.split('/').map(item => item.trim()).filter(item => item.length > 0)
-        let unit = unitList.length === 0 ? '/' : ''
+        const unitList = path.split('/').map(item => item.trim())
+        let unit = ''
         let index: any = 0
-        let controller: Constructor<any> | null = unitList.length === 0 ? router.get(unit) ?? null : null
-        if (unitList.length > 0) {
-            for (let idx in unitList) {
-                unit += '/' + unitList[idx]
-                index = idx
-                if (controller = router.get(unit) ?? null) break
-            }
+        let controller: Constructor<any> | null = null
+        for (let idx in unitList) {
+            if (unit[unit.length - 1] !== '/') unit += '/'
+            unit += unitList[idx]
+            index = idx
+            if (controller = router.get(unit) ?? null) break
         }
         if (!controller) throw { code: 404, data: null, msg: 'Not Found', name: ctx.path }
-        unit = '/' + unitList.slice(Number(index) + 1).join('/')
+        unit = '/' + unitList.slice(Number(index) + 1).filter(item => item.length > 0).join('/')
         const routes: Record<string, any> = Reflect.getMetadata(MetaDataType.REQUEST_PATH, controller.prototype)
         if (!routes?.[unit]) throw { code: 404, data: null, msg: 'Not Found', name: ctx.path }
         if (ctx.method.toUpperCase() === 'OPTIONS') return 'ok'

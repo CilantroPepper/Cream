@@ -75,7 +75,7 @@ npm install
 3. 编写入口
 
    ```typescript
-   import Cream, { Container } from './cream/cream'
+   import { Cream, Container } from './cream/cream'
    import { UserController } from './router/user/controller'
    import { UserService } from './router/user/service'
    import { Authorize } from './plugins/authorize'
