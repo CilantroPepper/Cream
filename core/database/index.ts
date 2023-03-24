@@ -27,6 +27,7 @@ export class DataBase {
     async query<T extends object>(statement: string, ...args: any[]): Promise<Result<T>> {
         try {
             const conn = await this.pool.promise().getConnection()
+            await conn.query(`set sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';`)
             await conn.beginTransaction()
             try {
                 const [items, fields] = await conn.query(statement, args)

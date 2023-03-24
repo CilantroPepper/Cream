@@ -11,7 +11,7 @@ export interface PoolConfig {
     password: string,
     connectionLimit: number
 }
-export interface Base {
+export interface Table {
     fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[]): Promise<Result<T>>
     put<T extends object>(entity: T): Promise<Result<object>>
     remove(conditions: Record<string, any>): Promise<object>
@@ -26,7 +26,7 @@ export interface CreamOptions {
     controller: Constructor<any>[],
     provider: Constructor<any>[],
     plugins?: AppPluginsNoNext,
-    midwares?: AppPlugins
+    midware?: AppPlugins
 }
 export interface Cache {
     get: <T>(k: string) => T | null;
