@@ -12,7 +12,7 @@ export interface PoolConfig {
     password: string,
     connectionLimit: number
 }
-export interface Base {
+export interface Table {
     fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[]): Promise<Result<T>>
     put<T extends object>(entity: T): Promise<Result<object>>
     remove(conditions: Record<string, any>): Promise<object>
@@ -24,7 +24,7 @@ export class DataBase {
     }
     private pool: Pool
 
-    private async query<T extends object>(statement: string, ...args: any[]): Promise<Result<T>> {
+    async query<T extends object>(statement: string, ...args: any[]): Promise<Result<T>> {
         try {
             const conn = await this.pool.promise().getConnection()
             await conn.beginTransaction()
@@ -56,7 +56,7 @@ export class DataBase {
         return origin
     }
 
-    public getBase(table: string): Base {
+    public getBase(table: string): Table {
         const self = this
         return {
             async fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[]) {
@@ -137,7 +137,7 @@ export class DataBase {
                     throw e
                 }
                 return { msg: 'ok' }
-            }
+            },
         }
     }
 }

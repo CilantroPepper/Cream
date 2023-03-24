@@ -12,8 +12,8 @@ import { response } from "../response"
 export interface CreamOptions {
     controller: Constructor<any>[],
     provider: Constructor<any>[],
-    plugins?: AppPluginsNoNext,
-    midwares?: AppPlugins
+    plugin?: AppPluginsNoNext,
+    midware?: AppPlugins
 }
 export interface CreamConfig {
     port: number
@@ -50,12 +50,12 @@ export class Cream {
     /** Start Server */
     async bootstrap() {
         const config = await this.loadConfig()
-        this.db = new DataBase(config.database)
-        const app = new Application([...(this.options?.midwares || []), this.requestHandler.bind(this)])
+        if (config.database) this.db = new DataBase(config.database)
+        const app = new Application([...(this.options?.midware || []), this.requestHandler.bind(this)])
         app.proxy = true
         app.listen(config.port, () => {
             console.info('=== Cream V3.0 Server ===\n')
-            console.info('Listen %d ...', config.port)
+            console.info('Listening ... http://localhost:%d', config.port)
         })
     }
     private readonly ioc = new Container()
@@ -84,7 +84,7 @@ export class Cream {
 
     private async handler(ctx: Context) {
         try {
-            for (let plugin of (this.options?.plugins ?? [])) await plugin?.(ctx)
+            for (let plugin of (this.options?.plugin ?? [])) await plugin?.(ctx)
         } catch (error: any) {
             if (error?.code === 200) return error // Can be the response
             else throw error
@@ -122,8 +122,11 @@ export class Cream {
         props.forEach(prop => {
             let value: any = null
             switch (prop.type) {
-                case 'database':
+                case 'table':
                     value = this.db?.getBase(prop.value)
+                    break
+                case 'database':
+                    value = this.db
                     break
                 default:
                     value = this.propHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: prop.type, key: prop.value }), null)

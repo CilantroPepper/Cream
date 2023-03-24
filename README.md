@@ -80,6 +80,7 @@ npm install
    import { UserService } from './router/user/service'
    import { Authorize } from './plugins/authorize'
    import { PropHandler } from './cream/interface'
+   import koaStatic from 'koa-static'
    
    const external = new Container() // 引入外部 Ioc 容器
    external.register(Authorize)
@@ -93,7 +94,8 @@ npm install
    const app = new Cream({
        controller: [UserController], // 注册 Controller
        provider: [UserService], // 注册 Service
-       plugins: [auth.interceptor.bind(auth)], // 请求插槽
+       plugin: [auth.interceptor.bind(auth)], // 请求插槽
+       midware: [koaStatic(resolve(__dirname, "./public"), { hidden: false })]
    })
    app.usePropHandler(propHandler) // 属性处理插槽
    
@@ -194,7 +196,7 @@ npm install
 
 ### Plugins 插件
 
-plugins 是在 Controller 处理请求之前的中间件，他是一个数组：
+plugin 是在 Controller 处理请求之前的中间件，他是一个数组：
 
 ```typescript
 type AppPluginsNoNext = ((ctx: Context) => Promise<any> | any)[]
@@ -209,7 +211,7 @@ type AppPluginsNoNext = ((ctx: Context) => Promise<any> | any)[]
 
 ### Midwares 中间件
 
-midwares 对应了 Koa 的中间件，他将作用于解析请求并分发 Controller 之前，如果你想使用 koa-static 一类的中间件，你需要使用该属性来让 Cream 引用他（引用格式详见根目录下 `interface.ts` 的 `CreamOptions`）
+`midware` 对应了 Koa 的中间件，他将作用于解析请求并分发 Controller 之前，如果你想使用 `koa-static` 一类的中间件，你需要使用该属性来让 Cream 引用他（引用格式详见根目录下 `interface.ts` 的 `CreamOptions`）
 
 ```typescript
 type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
@@ -271,19 +273,22 @@ Cream 会在遇到自定义的参数类型时调用自定义参数处理器，�
 
 ### PropHandler 属性处理器
 
-类似参数类型注入，Cream 也提供了对象属性的注入，需要注意，该注入是**一次性**的，也即注入后只在当前上下文有效，Cream 内置了一种属性类型：`@Database(table: string)` 用以获取一个相应数据表的数据库连接，他的用法非常简单：
+类似参数类型注入，Cream 也提供了对象属性的注入，需要注意，该注入是**一次性**的，也即注入后只在当前上下文有效，Cream 内置了两种属性类型：`@Database` 用以获取一个数据库连接，`@Table(name: string)` 用以获取一组API来控制某一个数据库表（CURD操作），他们的用法非常简单：
 
 ```typescript
 @Controller('/')
 export class IndexController {
-	@Database('NOTIFICATION')
-    private base!: Base
+	@Table('NOTIFICATION')
+    private table!: Table
+
+    @Database
+    private db!: DataBase
     
     // ...
     
     @Get('')
     async getIndex() {
-        const { items } = await this.base.fetch(['title, content, date'], [{ date: tools.getCurrentDate() }])
+        const { items } = await this.table.fetch(['title, content, date'], [{ date: tools.getCurrentDate() }])
         return items
     }
 }
@@ -334,7 +339,7 @@ Cream 模块导出了名为 `Container` 的 IoC 容器，你可以使用 `new Co
 ## 数据库操作
 
 Cream 基于 MySQL 封装了连接池并且提供了一套类似 NoSQL 的 API：`fetch` | `put` | `remove` | `update`，可以实现基本的增删改查操作。 
-
+如果你想自己编写 SQL，请使用 `@Database` 来获取一个数据库连接，然后调用其 `query` 方法来使用 SQL。
 
 
 
@@ -363,12 +368,14 @@ export interface Base {
 }
 export type Constructor<T> = new (...args: any[]) => T
 export type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
+export type AppPluginsNoNext = ((ctx: Context) => Promise<any> | any)[]
 export type ParamHandler = (p: { ctx: Context, type: string, key: string }) => any
 export type PropHandler = (p: { ctx: Context, type: string, key: string }) => any
 export interface CreamOptions {
     controller: Constructor<any>[],
     provider: Constructor<any>[],
-    plugins?: AppPlugins,
+    plugins?: AppPluginsNoNext,
+    midwares?: AppPlugins
 }
 export interface Cache {
     get: <T>(k: string) => T | null;

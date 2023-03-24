@@ -17,4 +17,5 @@ export function Property(value: string, type: string): PropertyDecorator {
     }
 }
 
-export const Database = (value: string) => Property(value, 'database')
+export const Database = Property('', 'database')
+export const Table = (value: string) => Property(value, 'table')
