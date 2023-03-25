@@ -72,7 +72,7 @@ export class Cream {
                 response.success(ctx, data?.data ?? data ?? '', data?.headers)
             else
                 response.success(ctx, {
-                    code: 200,
+                    code: data?.code ?? 200,
                     data: data?.data !== void 0 ? data?.data : data ?? null,
                     msg: data?.msg ?? 'success'
                 }, data?.headers)
