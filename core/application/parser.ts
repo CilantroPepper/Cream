@@ -8,7 +8,10 @@ export const requestParser = {
         if (ctx.method.toLowerCase() === 'post') {
             await (new Promise<void>(resolve => {
                 if (ctx.headers["content-type"]?.includes("multipart/form-data")) ctx.req.setEncoding('binary')
-                let data = ""
+                let data = Buffer.from('')
+                if (ctx.headers["content-length"]?.length ?? 0 > 15) {
+                    // TODO(大文件gzip上传)
+                }
                 ctx.req.on('data', chunk => data += chunk)
                 ctx.req.on('end', async () => {
                     try {

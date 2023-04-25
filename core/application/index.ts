@@ -19,7 +19,8 @@ export class Application extends koa {
             ctx.set({
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type'
+                'Access-Control-Allow-Headers': 'Content-Type, Content-Length',
+                'Access-Control-Expose-Headers': 'Content-Type, Content-Length, Content-Disposition'
             })
         })
         this.use(requestParser.parse)

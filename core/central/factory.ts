@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { Context, Next } from "koa"
 import { Constructor, Container } from "."
 import { AppPlugins, AppPluginsNoNext, Application } from "../application"
@@ -6,8 +5,8 @@ import { DataBase, PoolConfig } from "../database"
 import { ParamType } from "../decorator/param"
 import { PropType } from "../decorator/property"
 import { MetaDataType } from "../decorator/type"
-import { handler } from "../handler"
 import { response } from "../response"
+import { handler } from "../handler"
 
 export interface CreamOptions {
     controller: Constructor<any>[],
@@ -17,7 +16,7 @@ export interface CreamOptions {
 }
 export interface CreamConfig {
     port: number
-    database: PoolConfig
+    database?: PoolConfig
 }
 export type ParamHandler = (p: { ctx: Context, type: string, key: string }) => any
 export type PropHandler = (p: { ctx: Context, type: string, key: string }) => any
@@ -48,8 +47,7 @@ export class Cream {
     }
 
     /** Start Server */
-    async bootstrap() {
-        const config = await this.loadConfig()
+    async bootstrap(config: CreamConfig) {
         if (config.database) this.db = new DataBase(config.database)
         const app = new Application([...(this.options?.midware || []), this.requestHandler.bind(this)])
         app.proxy = true
@@ -77,8 +75,8 @@ export class Cream {
                     msg: data?.msg ?? 'success'
                 }, data?.headers)
         } catch (e: any) {
-            response.fail(ctx, typeof e?.code === 'number' ? e.code : 404, e?.msg ?? 'Request Error')
             handler.error(e)
+            response.fail(ctx, typeof e?.code === 'number' ? e.code : 404, e?.msg ?? 'Request Error')
         }
     }
 
@@ -135,16 +133,4 @@ export class Cream {
         })
         return await route?.call(Object.assign({}, instance, propInjection), ...paramInjection)
     }
-
-    /** Initialize Options From config.json */
-    private async loadConfig() {
-        if (!fs.existsSync('./config.json')) throw Error('File not exist:: config.json')
-        try {
-            const data: CreamConfig = JSON.parse(fs.readFileSync('./config.json').toString("utf-8"))
-            return data
-        } catch (error) {
-            throw error
-        }
-    }
-
 }
