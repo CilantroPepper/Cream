@@ -16,6 +16,7 @@ export interface CreamOptions {
 }
 export interface CreamConfig {
     port: number
+    base?: string
     database?: PoolConfig
 }
 export type ParamHandler = (p: { ctx: Context, type: string, key: string }) => any
@@ -49,14 +50,17 @@ export class Cream {
     /** Start Server */
     bootstrap(config: CreamConfig) {
         if (config.database) this.db = new DataBase(config.database)
+        this.base = config.base ?? '/'
         const app = new Application([...(this.options?.midware || []), this.requestHandler.bind(this)])
         app.listen(config.port, () => {
-            console.info('=== Cream V3.0 Server ===\n')
-            console.info('Listening ... http://localhost:%d', config.port)
+            console.info('=== Cream Server V3.2 ===')
+            console.info('For more information, please visit: https://github.com/CilantroPepper/cream\n')
+            console.info(`Server started successfully! Listening... http://localhost:${config.port}${this.base}`)
         })
     }
     private readonly ioc = new Container()
     private db: DataBase | null = null
+    private base: string = '/'
     private readonly router = new Map<string, Constructor<any>>()
     private readonly paramHandler: ParamHandler[] = []
     private readonly propHandler: PropHandler[] = []
@@ -86,7 +90,14 @@ export class Cream {
             if (error?.code === 200) return error // Can be the response
             else throw error
         } const router = this.router
-        const path = ctx.path
+        let path: string | undefined
+        // Cut the path
+        const regExp = new RegExp(`^${this.base}(?<path>\\S*)`, 'g')
+        if ((path = regExp.exec(ctx.path)?.groups?.path) === void 0) {
+            throw { code: 404, data: null, msg: 'Not Found', name: ctx.path }
+        }
+        path = '/' + path
+        ctx.path = path
         const unitList = path.split('/').map(item => item.trim())
         let unit = ''
         let index: any = 0
