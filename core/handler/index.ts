@@ -6,6 +6,6 @@ export const handler = {
         console.error(`${tools.date.toDetailString()} [Error] ${err.name ?? 'Unknown Error'}\n`, err?.stack || err.msg)
     },
     access: async (ctx: Context) => {
-        console.log(`${tools.date.toDetailString()} [Access] A client connected\n`, `Request Path: ${ctx.path}`, `Request IP: ${ctx.request.ip}}`)
+        console.log(`${tools.date.toDetailString()} [Access] A client connected\n`, `Request Path: ${ctx.path}`, `Request IP: ${ctx.request.ip}`)
     }
 }

@@ -47,10 +47,9 @@ export class Cream {
     }
 
     /** Start Server */
-    async bootstrap(config: CreamConfig) {
+    bootstrap(config: CreamConfig) {
         if (config.database) this.db = new DataBase(config.database)
         const app = new Application([...(this.options?.midware || []), this.requestHandler.bind(this)])
-        app.proxy = true
         app.listen(config.port, () => {
             console.info('=== Cream V3.0 Server ===\n')
             console.info('Listening ... http://localhost:%d', config.port)
@@ -101,17 +100,27 @@ export class Cream {
         if (!controller) throw { code: 404, data: null, msg: 'Not Found', name: ctx.path }
         unit = '/' + unitList.slice(Number(index) + 1).filter(item => item.length > 0).join('/')
         const routes: Record<string, any> = Reflect.getMetadata(MetaDataType.REQUEST_PATH, controller.prototype)
-        if (!routes?.[unit]) throw { code: 404, data: null, msg: 'Not Found', name: ctx.path }
+        let key: string | null = null
+        if (routes?.[unit]) key = unit
+        else {
+            for (let k of Object.keys(routes)) {
+                if (new RegExp(`^${k}$`, 'g').test(unit + '/')) {
+                    key = k
+                    break
+                }
+            }
+        }
+        if (!key) throw { code: 404, data: null, msg: 'Not Found', name: ctx.path }
         if (ctx.method.toUpperCase() === 'OPTIONS') return 'ok'
-        if (!routes[unit]?.method?.includes(ctx.method.toUpperCase())) throw { code: 503, data: null, msg: 'Forbidden', name: ctx.path }
+        if (!routes[key].method?.includes(ctx.method.toUpperCase())) throw { code: 503, data: null, msg: 'Forbidden', name: ctx.path }
         const instance = this.ioc.resolve(controller)
-        const route = instance?.[routes[unit]?.key]
+        const route = instance?.[routes[key].key]
         const params: ParamType[] = Reflect.getMetadata(MetaDataType.INJECT_PARAM, route) ?? []
         const paramInjection = params?.sort((a, b) => a.index - b.index)?.map(param => {
             if (param.type === 'query') return ctx.query[param.key]
-            if (param.type === 'form') return ctx?.data?.[param.key]
-            if (param.type === 'file') return ctx?.data?.['file']
-            if (param.type === 'formMap') return ctx?.data ?? {}
+            if (param.type === 'field') return ctx.fields?.[param.key]
+            if (param.type === 'file') return ctx.files?.[param.key]
+            if (param.type === 'fields') return ctx.fields ?? {}
             if (param.type === 'queryMap') return ctx?.query ?? {}
             return this.paramHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: param.type, key: param.key }), null)
         })

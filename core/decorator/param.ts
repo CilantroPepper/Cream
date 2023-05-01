@@ -16,7 +16,7 @@ export function Param(key: string, type: string): ParameterDecorator {
 }
 
 export const Query = (key: string) => Param(key, 'query')
-export const File = Param('', 'file')
-export const Form = (key: string) => Param(key, 'form')
+export const File = (key: string) => Param(key, 'file')
+export const Field = (key: string) => Param(key, 'field')
 export const QueryMap = Param('', 'queryMap')
-export const FormMap = Param('', 'formMap')
+export const Fields = Param('', 'fields')
