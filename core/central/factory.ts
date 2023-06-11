@@ -10,9 +10,9 @@ import { handler } from "../handler"
 
 export interface CreamOptions {
     controller: Constructor<any>[],
-    provider: Constructor<any>[],
+    // provider: Constructor<any>[],
     plugin?: AppPluginsNoNext,
-    midware?: AppPlugins
+    middleware?: AppPlugins
 }
 export interface CreamConfig {
     port: number
@@ -26,7 +26,7 @@ export class Cream {
     constructor(private options: CreamOptions) {
         const ioc = this.ioc
         const router = this.router
-        options.provider.forEach(item => ioc.register(item))
+        // options.provider.forEach(item => ioc.register(item))
         options.controller.forEach(item => {
             ioc.register(item)
             router.set(Reflect.getMetadata(MetaDataType.CONTROLLER_PATH, item), item)
@@ -51,7 +51,7 @@ export class Cream {
     bootstrap(config: CreamConfig) {
         if (config.database) this.db = new DataBase(config.database)
         this.base = config.base ?? '/'
-        const app = new Application([...(this.options?.midware || []), this.requestHandler.bind(this)])
+        const app = new Application([...(this.options?.middleware || []), this.requestHandler.bind(this)])
         app.listen(config.port, () => {
             console.info('=== Cream Server V3.2 ===')
             console.info('For more information, please visit: https://github.com/CilantroPepper/cream\n')

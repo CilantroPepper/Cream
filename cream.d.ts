@@ -1,10 +1,10 @@
 import { Context, Next } from 'koa'
-import Mime from 'mime/Mime'
-import { Readable } from 'stream'
+
 declare interface Result<T> {
     items: T[],
     fields: any
 }
+
 declare interface PoolConfig {
     host: string,
     port: number,
@@ -13,26 +13,31 @@ declare interface PoolConfig {
     password: string,
     connectionLimit: number
 }
+
 declare type Constructor<T> = new (...args: any[]) => T
 declare type AppPlugins = ((ctx: Context, next: Next) => Promise<any> | any)[]
 declare type AppPluginsNoNext = ((ctx: Context) => Promise<any> | any)[]
 declare type ParamHandler = (p: { ctx: Context, type: string, key: string }) => any
 declare type PropHandler = (p: { ctx: Context, type: string, key: string }) => any
+
 declare interface CreamOptions {
     controller: Constructor<any>[],
-    provider: Constructor<any>[],
+    // provider: Constructor<any>[],
     plugin?: AppPluginsNoNext,
-    midware?: AppPlugins
+    middleware?: AppPlugins
 }
+
 declare interface Cache {
     get: <T>(k: string) => T | null
     set: <T>(k: string, v: T) => void
     del: () => void
 }
+
 declare interface CacheOptions {
     stdTtl?: number,
     checkTime?: number
 }
+
 declare interface CreamConfig {
     port: number
     database?: PoolConfig
@@ -48,10 +53,15 @@ declare class Container {
 
 declare class Cream {
     constructor(options: CreamOptions)
+
     getContainer(): Container
+
     getRouter(): Map<string, Constructor<any>>
+
     useParamHandler(process: ParamHandler): void
+
     usePropHandler(process: PropHandler): void
+
     bootstrap(config: CreamConfig): void
 }
 
@@ -63,7 +73,11 @@ declare const tools: {
         base64Encode: (origin: string) => string
         md5: (origin: string) => string
     }
-    mime: Mime
+    mime: {
+        getType(path: string): string | null
+        getExtension(mime: string): string | null
+        define(typeMap: any, force?: boolean): void
+    }
     generalUUID(length?: number): string
     date: {
         toString(date?: Date | null, divider?: string): string
@@ -78,23 +92,28 @@ declare const tools: {
 
 declare interface DataBaseTable {
     fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[]): Promise<Result<T>>
+
     put<T extends object>(entity: T): Promise<Result<object>>
+
     remove(conditions: Record<string, any>): Promise<object>
+
     update<T extends object>(entity: T, conditions: Record<string, any>[]): Promise<object>
 }
 
 declare class DataBase {
-    constructor(config: PoolConfig);
-    
-    query<T extends object>(statement: string, ...args: any[]): Promise<Result<T>>;
-    getBase(table: string): DataBaseTable;
+    constructor(config: PoolConfig)
+
+    query<T extends object>(statement: string, ...args: any[]): Promise<Result<T>>
+
+    getBase(table: string): DataBaseTable
 }
 
 declare interface ParamType {
-    index: number;
-    type: string;
-    key: string;
+    index: number
+    type: string
+    key: string
 }
+
 declare function Param(key: string, type: string): ParameterDecorator
 
 declare const Query: (key: string) => ParameterDecorator
@@ -104,19 +123,25 @@ declare const QueryMap: ParameterDecorator
 declare const Fields: ParameterDecorator
 
 declare interface PropType {
-    propKey: string;
-    value: string;
-    type: string;
+    propKey: string
+    value: string
+    type: string
 }
+
 declare function Property(value: string, type: string): PropertyDecorator
 
 declare const Database: PropertyDecorator
 declare const Table: (value: string) => PropertyDecorator
+
 declare function Request(path: string, method: 'GET' | 'POST'): MethodDecorator
 
 declare const Get: (path: string) => MethodDecorator
 declare const Post: (path: string) => MethodDecorator
+
 declare function Controller(path: string): ClassDecorator
+
+declare const Injectable: ClassDecorator
+
 declare namespace ChunkResult {
     export type file = {
         filename: string,

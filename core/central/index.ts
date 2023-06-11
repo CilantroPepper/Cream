@@ -11,8 +11,15 @@ export class Container {
     }
 
     resolve<T>(constructor: Constructor<T>): T {
-        const instance = this.dependencies.get(constructor)
-        if (!instance) throw new Error(`Cannot resolve dependency: ${constructor}`)
+        let instance = this.dependencies.get(constructor)
+        if (!instance) {
+            try {
+                this.register(constructor)
+                instance = this.dependencies.get(constructor)
+            } catch (e) {
+                throw new Error(`Cannot resolve dependency: ${constructor}`)
+            }
+        }
         return instance
     }
 }
