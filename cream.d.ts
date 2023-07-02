@@ -1,4 +1,5 @@
 import { Context, Next } from 'koa'
+import CryptoJS from 'crypto-js'
 
 declare interface Result<T> {
     items: T[],
@@ -72,6 +73,7 @@ declare const tools: {
         base64Decode: (origin: string) => string
         base64Encode: (origin: string) => string
         md5: (origin: string) => string
+        proto: CryptoJS
     }
     mime: {
         getType(path: string): string | null
@@ -151,4 +153,12 @@ declare namespace ChunkResult {
     }
     export type files = Record<string, file>
     export type fields = Record<string, string>
+}
+
+declare class CommonResult {
+    constructor(value: any)
+    get headers(): Record<string, string>
+    set headers(value: Record<string, string>)
+    get value(): any
+    set value(v: any)
 }

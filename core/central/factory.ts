@@ -7,6 +7,7 @@ import { PropType } from "../decorator/property"
 import { MetaDataType } from "../decorator/type"
 import { response } from "../response"
 import { handler } from "../handler"
+import { CommonResult } from "../decorator/common"
 
 export interface CreamOptions {
     controller: Constructor<any>[],
@@ -69,7 +70,9 @@ export class Cream {
             await next()
             handler.access(ctx)
             const data: any = await this.handler.call(this, ctx)
-            if (data instanceof Buffer || data?.data instanceof Buffer)
+            if (data instanceof CommonResult) {
+                response.success(ctx, data.value, data.headers)
+            } else if (data instanceof Buffer || data?.data instanceof Buffer)
                 response.success(ctx, data?.data ?? data ?? '', data?.headers)
             else
                 response.success(ctx, {

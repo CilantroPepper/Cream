@@ -1,11 +1,12 @@
 import { Context } from "koa"
+import { CommonResult } from "../decorator/common"
 
 export const response = {
     success(ctx: Context, data: string | Buffer | object | number, headers?: { [key: string]: string }) {
         ctx.status = 200
         if (headers)
             ctx.set(headers)
-        if (data && !(data instanceof Buffer) && typeof data === 'object') {
+        if (data && !(data instanceof CommonResult) && !(data instanceof Buffer) && typeof data === 'object') {
             ctx.set({
                 'Content-Type': 'application/json; charset=utf-8;'
             })

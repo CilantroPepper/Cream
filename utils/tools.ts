@@ -10,7 +10,8 @@ export const tools = {
         aesDecrypt: (origin: string, key: string) => CryptoJS.AES.decrypt(origin, key).toString(Utf8),
         base64Decode: (origin: string) => Base64.parse(origin).toString(Utf8),
         base64Encode: (origin: string) => Base64.stringify(Utf8.parse(origin)),
-        md5: (origin: string) => CryptoJS.MD5(origin).toString(Utf8)
+        md5: (origin: string) => CryptoJS.MD5(origin).toString(Utf8),
+        proto: CryptoJS
     },
     // MimeType
     mime,

@@ -12,4 +12,5 @@ export { DataBase, PoolConfig, Result, Table as TableOptions } from './core/data
 export { Cache } from './utils/cache'
 export { tools } from './utils/tools'
 export { Context, Next } from 'koa'
+export { CommonResult } from './core/decorator/common'
 export { Cream , CreamConfig, CreamOptions } from './core/central/factory'
