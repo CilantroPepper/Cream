@@ -69,20 +69,12 @@ export class Cream {
         try {
             await next()
             handler.access(ctx)
-            const data: any = await this.handler.call(this, ctx)
-            if (data instanceof CommonResult) {
-                response.success(ctx, data.value, data.headers)
-            } else if (data instanceof Buffer || data?.data instanceof Buffer)
-                response.success(ctx, data?.data ?? data ?? '', data?.headers)
-            else
-                response.success(ctx, {
-                    code: data?.code ?? 200,
-                    data: data?.data !== void 0 ? data?.data : data ?? null,
-                    msg: data?.msg ?? 'success'
-                }, data?.headers)
+            const data: CommonResult = await this.handler.call(this, ctx)
+            response.success(ctx, data)
         } catch (e: any) {
             handler.error(e)
-            response.fail(ctx, typeof e?.code === 'number' ? e.code : 404, e?.msg ?? 'Request Error')
+            const res = CommonResult.fail({ msg: e?.msg, code: e?.code })
+            response.fail(ctx, res)
         }
     }
 

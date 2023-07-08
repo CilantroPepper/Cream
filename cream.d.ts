@@ -73,7 +73,7 @@ declare const tools: {
         base64Decode: (origin: string) => string
         base64Encode: (origin: string) => string
         md5: (origin: string) => string
-        proto: CryptoJS
+        proto: typeof CryptoJS
     }
     mime: {
         getType(path: string): string | null
@@ -156,7 +156,10 @@ declare namespace ChunkResult {
 }
 
 declare class CommonResult {
-    constructor(value: any)
+    static ok<T extends object | string | number>(value: T, headers?: Record<string, any>): CommonResult
+    static file(value: Buffer, name: string, attachment?: boolean): CommonResult
+    static fail(params?: { msg?: string, code?: number }): CommonResult
+    private constructor(value: any)
     get headers(): Record<string, string>
     set headers(value: Record<string, string>)
     get value(): any
