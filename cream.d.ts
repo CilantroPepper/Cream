@@ -141,6 +141,7 @@ declare const Get: (path: string) => MethodDecorator
 declare const Post: (path: string) => MethodDecorator
 
 declare function Controller(path: string): ClassDecorator
+declare const Required: ParameterDecorator
 
 declare const Injectable: ClassDecorator
 

@@ -11,7 +11,6 @@ import { CommonResult } from "../decorator/common"
 
 export interface CreamOptions {
     controller: Constructor<any>[],
-    // provider: Constructor<any>[],
     plugin?: AppPluginsNoNext,
     middleware?: AppPlugins
 }
@@ -27,7 +26,6 @@ export class Cream {
     constructor(private options: CreamOptions) {
         const ioc = this.ioc
         const router = this.router
-        // options.provider.forEach(item => ioc.register(item))
         options.controller.forEach(item => {
             ioc.register(item)
             router.set(Reflect.getMetadata(MetaDataType.CONTROLLER_PATH, item), item)
@@ -122,14 +120,31 @@ export class Cream {
         const instance = this.ioc.resolve(controller)
         const route = instance?.[routes[key].key]
         const params: ParamType[] = Reflect.getMetadata(MetaDataType.INJECT_PARAM, route) ?? []
+        const paramsMap: Record<string, string | undefined | string[] | null> = {}
         const paramInjection = params?.sort((a, b) => a.index - b.index)?.map(param => {
-            if (param.type === 'query') return ctx.query[param.key]
-            if (param.type === 'field') return ctx.fields?.[param.key]
-            if (param.type === 'file') return ctx.files?.[param.key]
+            if (param.type === 'query') {
+                paramsMap[param.key] = ctx.query[param.key]
+                return paramsMap[param.key]
+            }
+            if (param.type === 'field') {
+                paramsMap[param.key] = ctx.fields?.[param.key]
+                return paramsMap[param.key]
+            }
+            if (param.type === 'file') {
+                paramsMap[param.key] = ctx.files?.[param.key]
+                return paramsMap[param.key]
+            }
             if (param.type === 'fields') return ctx.fields ?? {}
             if (param.type === 'queryMap') return ctx?.query ?? {}
-            return this.paramHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: param.type, key: param.key }), null)
+            paramsMap[param.key] = this.paramHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: param.type, key: param.key }), null)
+            return paramsMap[param.key]
         })
+        const requiredParams: string[] = Reflect.getMetadata(MetaDataType.REQUIRED_PARAM, route) ?? []
+        for (const param of requiredParams) {
+            if (!paramsMap[param]) {
+                throw { code: 413, msg: `Require param: ${param}` }
+            }
+        }
         const props: PropType[] = Reflect.getMetadata(MetaDataType.INJECT_PROP, instance) ?? []
         const propInjection: Record<string, any> = {}
         props.forEach(prop => {

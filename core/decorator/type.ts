@@ -4,4 +4,5 @@ export const MetaDataType = {
     REQUEST_PATH: 'request:path',
     INJECT_PARAM: 'inject:param',
     INJECT_PROP: 'inject:prop',
+    REQUIRED_PARAM: 'required:param'
 }
