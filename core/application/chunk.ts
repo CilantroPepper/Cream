@@ -1,6 +1,5 @@
 import busboy from "busboy"
 import { Context } from "koa"
-import { Readable } from "stream"
 
 export interface ChunkResult {
     files: Record<string, {
@@ -17,7 +16,7 @@ export const Chunk = (ctx: Context) => new Promise<ChunkResult>((resolve, reject
         files: {},
         fields: {}
     }
-    const bb = busboy({ headers: ctx.req.headers })
+    const bb = busboy({ headers: ctx.req.headers, defParamCharset: 'utf8' })
     bb.on('file', (name, stream, info) => {
         const { filename, mimeType, encoding } = info
         const chunks: any[] = []
@@ -25,7 +24,7 @@ export const Chunk = (ctx: Context) => new Promise<ChunkResult>((resolve, reject
         stream.on('end', () => {
             result.files[name] = {
                 buffer: Buffer.concat(chunks),
-                filename,
+                filename: filename,
                 encoding: (["ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "base64url", "latin1", "binary", "hex"]).includes(encoding) ? encoding : 'binary' as any,
                 mimeType
             }

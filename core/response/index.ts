@@ -3,7 +3,7 @@ import { CommonResult } from "../decorator/common"
 
 export const response = {
     success(ctx: Context, data: CommonResult) {
-        ctx.status = data.code
+        ctx.status = 200
         ctx.set(data.headers)
         ctx.body = data.value
     },
