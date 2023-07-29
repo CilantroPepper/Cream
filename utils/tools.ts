@@ -53,6 +53,15 @@ export const tools = {
         for (let i = 0; i < length; ++i)
             uuid += dict[Math.floor(Math.random() * dict.length)]
         return uuid
+    },
+    flat(arr: any[]): any[] {
+        const result = []
+        for (const i of arr) {
+            if (i instanceof Array) {
+                result.push(...this.flat(i))
+            }
+            result.push(i)
+        }
+        return result
     }
-    
 }

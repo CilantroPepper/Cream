@@ -10,7 +10,8 @@ export class CommonResult {
         const res = new CommonResult(data, 200, 'success')
         res.headers = headers ?? {
             'Content-Type': 'application/json',
-            'Content-Length': data.length
+            'Transfer-Encoding': 'chunked',
+            // 'Content-Length': data.length
         }
         return res
     }
@@ -18,7 +19,8 @@ export class CommonResult {
         const res = new CommonResult(value, 200, 'success')
         res.headers = {
             'Content-Type': mime.getType(name) ?? 'application/json',
-            'Content-Length': value.length.toString(),
+            'Transfer-Encoding': 'chunked',
+            // 'Content-Length': value.length.toString(),
             'Content-Disposition': `${attachment ? 'attachment;' : ''}filename=${name}`
         }
         return res
@@ -32,7 +34,8 @@ export class CommonResult {
         const res = new CommonResult(data, params?.code ?? 500, params?.msg ?? 'Request Error')
         res.headers = {
             'Content-Type': 'application/json',
-            'Content-Length': data.length.toString()
+            'Transfer-Encoding': 'chunked',
+            // 'Content-Length': data.length.toString()
         }
         return res
     }

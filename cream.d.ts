@@ -166,3 +166,18 @@ declare class CommonResult {
     get value(): any
     set value(v: any)
 }
+
+declare const errorMap = {
+    RequestError: [400, '发出的请求有错误'],
+    NoPermission: [401, '用户没有权限'],
+    AccessDeny: [403, '访问被禁止'],
+    NotFound: [404, '资源不存在'],
+    NotAvailable: [406, '请求不可得'],
+    PermanentlyDeleted: [410, '资源被永久删除'],
+    ValidationError: [422, '验证错误'],
+    InternalError: [500, '服务器内部错误'],
+    BadGateway: [502, '网关错误'],
+    ServiceNotAvailable: [503, '服务不可用'],
+    Timeout: [504, '网关超时'],
+    TooLarge: [513, '文件过大'],
+}

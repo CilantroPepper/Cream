@@ -20,7 +20,7 @@ export class Application extends koa {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
                 'Access-Control-Allow-Headers': 'Content-Type, Content-Length',
-                'Access-Control-Expose-Headers': 'Content-Type, Content-Length, Content-Disposition'
+                'Access-Control-Expose-Headers': 'Content-Type, Content-Length, Content-Disposition, Transfer-Encoding'
             })
         })
         this.use(requestParser.parse)

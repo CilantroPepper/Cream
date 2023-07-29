@@ -5,9 +5,9 @@ import { DataBase, PoolConfig } from "../database"
 import { ParamType } from "../decorator/param"
 import { PropType } from "../decorator/property"
 import { MetaDataType } from "../decorator/type"
-import { response } from "../response"
+import { errorMap, response } from "../response"
 import { handler } from "../handler"
-import { CommonResult } from "../decorator/common"
+import { CommonResult } from "../response/common"
 
 export interface CreamOptions {
     controller: Constructor<any>[],
@@ -142,7 +142,7 @@ export class Cream {
         const requiredParams: string[] = Reflect.getMetadata(MetaDataType.REQUIRED_PARAM, route) ?? []
         for (const param of requiredParams) {
             if (!paramsMap[param]) {
-                throw { code: 413, msg: `Require param: ${param}` }
+                throw { code: errorMap.RequestError[0], msg: `Require param: ${param}` }
             }
         }
         const props: PropType[] = Reflect.getMetadata(MetaDataType.INJECT_PROP, instance) ?? []
