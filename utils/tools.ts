@@ -59,8 +59,9 @@ export const tools = {
         for (const i of arr) {
             if (i instanceof Array) {
                 result.push(...this.flat(i))
+            } else {
+                result.push(i)
             }
-            result.push(i)
         }
         return result
     }
