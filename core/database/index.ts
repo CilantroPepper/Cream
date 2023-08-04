@@ -60,7 +60,7 @@ export class DataBase {
     public getBase(table: string): Table {
         const self = this
         return {
-            async fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[]) {
+            async fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[], attachment?: Record<'ODER BY' | 'SORT BY' | 'LIMIT', string[]>) {
                 let statement = 'SELECT'
                 const args: any[] = []
                 if (items.length === 0) statement += ` * FROM ${table} WHERE ${conditions.length === 0 ? '' : '('}`
@@ -78,7 +78,12 @@ export class DataBase {
                     statement = statement.slice(0, -4) + ')'
                     if (index < condition.length - 1) statement += ' OR'
                 })
-                statement += `${conditions.length === 0 ? '' : ') AND'} DELETED = 0`
+                statement += `${conditions.length === 0 ? '' : ') AND'} DELETED = 0 `
+                if (attachment) {
+                    Object.entries(attachment).forEach(([key, value]) => {
+                        statement += `${key} ${value.join(' ')} `
+                    })
+                }
                 try {
                     return await self.query<T>(statement, ...args)
                 } catch (e) {

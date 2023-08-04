@@ -6,7 +6,7 @@ export type AppPluginsNoNext = ((ctx: Context) => Promise<any> | any)[]
 
 export class Application extends koa {
     constructor(private plugins?: AppPlugins | AppPluginsNoNext) {
-        super()
+        super({ proxy: true })
         try {
             this.init()
         } catch (error: any) {

@@ -90,10 +90,12 @@ declare const tools: {
     checkParam(target: Record<string, string>, required: string[]): boolean
     getCurrentDateString(): string
     generalUUID(length?: number): string
+    camelToUnderline(target: string): string
+    underlineToCamel(target: string): string
 }
 
 declare interface DataBaseTable {
-    fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[]): Promise<Result<T>>
+    fetch<T extends object>(items: (keyof T)[], conditions: Record<string, any>[], attachment?: Record<'ODER BY' | 'SORT BY' , 'LIMIT', string[]>): Promise<Result<T>>
 
     put<T extends object>(entity: T): Promise<Result<object>>
 
