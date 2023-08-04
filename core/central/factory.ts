@@ -2,7 +2,7 @@ import { Context, Next } from "koa"
 import { Constructor, Container } from "."
 import { AppPlugins, AppPluginsNoNext, Application } from "../application"
 import { DataBase, PoolConfig } from "../database"
-import { ParamType } from "../decorator/param"
+import { ParamType, QueryMap } from '../decorator/param';
 import { PropType } from "../decorator/property"
 import { MetaDataType } from "../decorator/type"
 import { errorMap, response } from "../response"
@@ -119,7 +119,7 @@ export class Cream {
         if (!routes[key].method?.includes(ctx.method.toUpperCase())) throw { code: 503, data: null, msg: 'Forbidden', name: ctx.path }
         const instance = this.ioc.resolve(controller)
         const route = instance?.[routes[key].key]
-        const params: ParamType[] = Reflect.getMetadata(MetaDataType.INJECT_PARAM, route) ?? []
+        const params: ParamType[] = Reflect.getMetadata(MetaDataType.INJECT_PARAM, instance, routes[key].key) ?? []
         const paramsMap: Record<string, string | undefined | string[] | null> = {}
         const paramInjection = params?.sort((a, b) => a.index - b.index)?.map(param => {
             if (param.type === 'query') {
@@ -134,8 +134,16 @@ export class Cream {
                 paramsMap[param.key] = ctx.files?.[param.key]
                 return paramsMap[param.key]
             }
-            if (param.type === 'fields') return ctx.fields ?? {}
-            if (param.type === 'queryMap') return ctx?.query ?? {}
+            if (param.type === 'fields') {
+                const res = new param.constructor()
+                Object.entries(ctx.fields ?? {}).forEach(([key, value]) => res[key] = value)
+                return res
+            }
+            if (param.type === 'queryMap') {
+                const res = new param.constructor()
+                Object.entries(ctx.query ?? {}).forEach(([key, value]) => res[key] = value)
+                return res
+            }
             paramsMap[param.key] = this.paramHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: param.type, key: param.key }), null)
             return paramsMap[param.key]
         })
@@ -161,6 +169,6 @@ export class Cream {
             }
             propInjection[prop.propKey] = value
         })
-        return await route?.call(Object.assign({}, instance, propInjection), ...paramInjection)
+        return await route?.apply(Object.assign({}, instance, propInjection), paramInjection)
     }
 }

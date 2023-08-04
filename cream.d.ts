@@ -181,3 +181,12 @@ declare const errorMap = {
     Timeout: [504, '网关超时'],
     TooLarge: [513, '文件过大'],
 }
+
+declare const MetaDataType: {
+    PARAM_TYPE: string
+    CONTROLLER_PATH: string
+    REQUEST_PATH: string
+    INJECT_PARAM: string
+    INJECT_PROP: string
+    REQUIRED_PARAM: string
+}

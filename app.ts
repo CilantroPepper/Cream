@@ -1,4 +1,5 @@
 import 'reflect-metadata'
+export { MetaDataType } from './core/decorator/type'
 export { handler } from './core/handler'
 export { response, errorMap } from './core/response'
 export { Application, AppPlugins, AppPluginsNoNext } from './core/application'
