@@ -16,6 +16,3 @@ export function Property(value: string, type: string): PropertyDecorator {
         Reflect.defineMetadata(MetaDataType.INJECT_PROP, props, target)
     }
 }
-
-export const Database = Property('', 'database')
-export const Table = (value: string) => Property(value, 'table')

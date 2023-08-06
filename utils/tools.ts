@@ -66,9 +66,9 @@ export const tools = {
         return result
     },
     camelToUnderline(target: string) {
-        return target.replace(/(?<break>[A-Z])/g, '_$break').toLowerCase()
+        return target.replace(/([A-Z])/g, '_$1').toLowerCase()
     },
     underlineToCamel(target: string) {
-        return target.replace(/\_(?<break>\w)/g, (_, letter: string) => letter.toUpperCase())
+        return target.replace(/\_(\w)/g, (_, letter: string) => letter.toUpperCase())
     }
 }

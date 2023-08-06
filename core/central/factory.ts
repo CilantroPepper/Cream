@@ -45,6 +45,9 @@ export class Cream {
     usePropHandler(process: PropHandler) {
         this.propHandler.push(process)
     }
+    getDataBase() {
+        return this.db
+    }
 
     /** Start Server */
     bootstrap(config: CreamConfig) {
@@ -144,6 +147,12 @@ export class Cream {
                 Object.entries(ctx.query ?? {}).forEach(([key, value]) => res[key] = value)
                 return res
             }
+            if (param.type === 'database:table') {
+                return this.db?.getBase(param.key)
+            }
+            if (param.type === 'database:base') {
+                return this.db
+            }
             paramsMap[param.key] = this.paramHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: param.type, key: param.key }), null)
             return paramsMap[param.key]
         })
@@ -156,18 +165,7 @@ export class Cream {
         const props: PropType[] = Reflect.getMetadata(MetaDataType.INJECT_PROP, instance) ?? []
         const propInjection: Record<string, any> = {}
         props.forEach(prop => {
-            let value: any = null
-            switch (prop.type) {
-                case 'table':
-                    value = this.db?.getBase(prop.value)
-                    break
-                case 'database':
-                    value = this.db
-                    break
-                default:
-                    value = this.propHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: prop.type, key: prop.value }), null)
-            }
-            propInjection[prop.propKey] = value
+            propInjection[prop.propKey] = this.propHandler?.reduce((pre, cur) => pre ? pre : cur?.({ ctx, type: prop.type, key: prop.value }), null)
         })
         return await route?.apply(Object.assign({}, instance, propInjection), paramInjection)
     }

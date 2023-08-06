@@ -78,7 +78,7 @@ export class DataBase {
                     statement = statement.slice(0, -4) + ')'
                     if (index < condition.length - 1) statement += ' OR'
                 })
-                statement += `${conditions.length === 0 ? '' : ') AND'} DELETED = 0 `
+                statement += `${conditions.length === 0 ? '' : ') AND'} deleted = 0 `
                 if (attachment) {
                     Object.entries(attachment).forEach(([key, value]) => {
                         statement += `${key} ${value.join(' ')} `

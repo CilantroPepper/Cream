@@ -63,6 +63,8 @@ declare class Cream {
 
     usePropHandler(process: PropHandler): void
 
+    getDataBase(): InstanceType<typeof DataBase>
+
     bootstrap(config: CreamConfig): void
 }
 
@@ -134,8 +136,8 @@ declare interface PropType {
 
 declare function Property(value: string, type: string): PropertyDecorator
 
-declare const Database: PropertyDecorator
-declare const Table: (value: string) => PropertyDecorator
+declare const Database: ParameterDecorator
+declare const Table: (value: string) => ParameterDecorator
 
 declare function Request(path: string, method: 'GET' | 'POST'): MethodDecorator
 
